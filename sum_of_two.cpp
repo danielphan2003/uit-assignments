@@ -7,15 +7,16 @@ void announce_impossible() {
   exit(0);
 }
 
-void print_ans(int a, int b) {
+void print_ans(size_t a, size_t b, bool cond) {
   std::cout << a << " " << b;
+  if (cond) std::cout << "\n";
 }
 
-int cmp(std::pair<int, int> a, std::pair<int, int> b) {
+int cmp(std::pair<long, int> a, std::pair<long, int> b) {
   return a.first < b.first;
 }
 
-int pred_unique_intersect(std::pair<int, int> a, std::pair<int, int> b) {
+int pred_unique_intersect(std::pair<long, int> a, std::pair<long, int> b) {
   // remove duplicates if one.first equals x/2
   // or when one.second (original index) is higher than other
   return a.first == b.first && (a.first == (double) x/2 || a.second < b.second);
@@ -46,14 +47,11 @@ int main() {
 
   std::vector< std::pair<long, int> > arr(n), neg, dup;
   for (size_t i = 0; i < n; ++i) {
-    long first;
-    int second = i;
+    int first, second = i;
     std::cin >> first;
     arr[i] = std::make_pair(first, second);
     if (first < min_el) min_el = first;
   }
-
-  if (min_el > x) announce_impossible();
 
   std::sort(arr.begin(), arr.end(), cmp);
 
@@ -65,12 +63,11 @@ int main() {
 
   auto intersect = intersection(arr, neg);
 
-  if (intersect.size() < 2) announce_impossible();
+  if (min_el > x || intersect.size() < 2) announce_impossible();
 
-  for (size_t i = 0; i < intersect.size(); ++i) {
+  for (size_t i = 0; i < intersect.size(); ++i)
     if (intersect[i].first == (double) x/2)
       dup.push_back(intersect[i]);
-  }
 
   if (dup.size() > 1) {
     int min_dup_idx = 2e5 + 1, max_dup_idx = -1;
@@ -78,18 +75,13 @@ int main() {
       if (dup[i].second < min_dup_idx) min_dup_idx = dup[i].second + 1;
       if (dup[i].second > max_dup_idx) max_dup_idx = dup[i].second + 1;
     }
-    print_ans(min_dup_idx, max_dup_idx);
     auto last = std::unique(intersect.begin(), intersect.end(), pred_unique_intersect);
     intersect.erase(last, intersect.end());
-    if (intersect.size() >= 2) std::cout << "\n";
+    print_ans(min_dup_idx, max_dup_idx, intersect.size() >= 2);
   }
 
-  for (size_t i = 0; i < intersect.size() - 1; ++i) {
-    for (size_t j = i + 1; j < intersect.size(); ++j) {
-      if (intersect[i].first + intersect[j].first == (double) x) {
-        print_ans(intersect[i].second + 1, intersect[j].second + 1);
-        if (j < intersect.size()) std::cout << "\n";
-      }
-    }
-  };
+  for (size_t i = 0; i < intersect.size() - 1; ++i)
+    for (size_t j = i + 1; j < intersect.size(); ++j)
+      if (intersect[i].first + intersect[j].first == x)
+        print_ans(intersect[i].second + 1, intersect[j].second + 1, j < intersect.size());
 }
