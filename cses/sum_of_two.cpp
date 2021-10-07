@@ -25,15 +25,15 @@ int pred_unique_intersect(std::pair<long, int> a, std::pair<long, int> b) {
 std::vector< std::pair<long, int> >
 intersection(std::vector< std::pair<long, int> > &v1,
             std::vector< std::pair<long, int> > &v2) {
-    std::vector< std::pair<long, int> > v3;
+  std::vector< std::pair<long, int> > v3;
 
-    std::sort(v1.begin(), v1.end(), cmp);
-    std::sort(v2.begin(), v2.end(), cmp);
+  std::sort(v1.begin(), v1.end(), cmp);
+  std::sort(v2.begin(), v2.end(), cmp);
 
-    std::set_intersection(v1.begin(),v1.end(),
-                          v2.begin(),v2.end(),
-                          back_inserter(v3), cmp);
-    return v3;
+  std::set_intersection(v1.begin(),v1.end(),
+                        v2.begin(),v2.end(),
+                        back_inserter(v3), cmp);
+  return v3;
 }
 
 int main() {
