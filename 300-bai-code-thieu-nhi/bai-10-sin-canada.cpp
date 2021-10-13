@@ -10,16 +10,18 @@ int main() {
 
     int s1 = 0, s2 = 0;
 
-    for (int i = 0; i < s.length(); i += 2) {
-      if (i < s.length() - 1) s1 += (int(s[i]) - int('0'));
-      if (i > 0) s2 += (int(s[i - 1]) - int('0'))*2;
+    for (int i = 0; i < s.length() - 1; i += 2)
+      s1 += (s[i] - '0');
+
+    for (int i = 1; i < s.length(); i += 2) {
+      int _s2 = (s[i - 1] - '0')*2;
+      if (_s2 / 10 >= 1) _s2 = (_s2 % 10) + (_s2 / 10);
+      s2 += _s2;
     }
 
-    if (s2 / 10 >= 1) s2 = (s2 % 10) + (s2 / 10);
-
-    if ((s1 + s2 + int(s[s.length() - 1])) % 10)
-      std::cout << "SIN khong hop le!\n";
-    else
+    if ((s1 + s2 + (s.back() - '0')) % 10 == 0)
       std::cout << "SIN hop le!\n";
+    else
+      std::cout << "SIN khong hop le!\n";
   };
 }
