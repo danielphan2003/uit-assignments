@@ -1,0 +1,6 @@
+imports = [
+  "language.c"
+]
+
+[language.c]
+compiler = "pkgs.gcc"
