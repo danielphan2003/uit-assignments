@@ -82,6 +82,6 @@
     "typeindex": "cpp",
     "valarray": "cpp"
   },
-  "nixEnvSelector.suggestion": false,
-  "nixEnvSelector.nixFile": "${workspaceRoot}/flake.nix"
+  "nixEnvSelector.suggestion": true,
+  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix"
 }

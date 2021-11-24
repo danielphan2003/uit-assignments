@@ -3,7 +3,7 @@
     {
       "type": "process",
       "label": "C/C++: cpp build active file",
-      "command": "/nix/store/88ghxafjpqp5sqpd75r51qqg4q5d95ss-gcc-wrapper-10.3.0/bin/g++",
+      "command": "/nix/store/276p5pgfjf9ia9jljgkbmb7zky73p5ag-gcc-wrapper-10.3.0/bin/gcc",
       "args": [
         "-g",
         "${file}",

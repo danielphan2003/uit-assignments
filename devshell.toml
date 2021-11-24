@@ -1,6 +1,16 @@
 imports = [
-  "language.c"
+  "language.c",
+  "locale"
 ]
 
 [language.c]
 compiler = "pkgs.gcc"
+
+[extra.locale]
+lang = "en_US.UTF-8"
+
+[[commands]]
+package = "gcc"
+
+[[commands]]
+package = "pkgs.vscode-extensions.vadimcn.vscode-lldb.lldb"
