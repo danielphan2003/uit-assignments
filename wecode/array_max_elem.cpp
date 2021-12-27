@@ -2,8 +2,6 @@
 
 void Input(int &N) { std::cin >> N; }
 
-#include <climits>
-
 const int MAXN = 100;
 
 void NhapMang(int (&arr)[MAXN], int n) {
@@ -13,13 +11,10 @@ void NhapMang(int (&arr)[MAXN], int n) {
 }
 
 void SoLonNhat(const int (&arr)[MAXN], int n, int &max) {
-  long lMax = (long) INT_MIN - 1;
-  for (int i = 0; i < n; ++i) {
-    if (lMax < arr[i]) {
-      lMax = arr[i];
-    }
-  }
-  max = lMax;
+  max = arr[0];
+  for (int i = 1; i < n; ++i)
+    if (max < arr[i])
+      max = arr[i];
 }
 
 int main() {

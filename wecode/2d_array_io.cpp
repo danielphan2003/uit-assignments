@@ -27,7 +27,6 @@ void XuatMaTran(const int (&mat)[MAXR][MAXC], int m, int n) {
   }
 }
 
-
 int main() {
   int a[MAXR][MAXC], r, c;
   NhapMaTran(a, r, c);
