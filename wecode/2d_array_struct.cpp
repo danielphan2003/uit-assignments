@@ -1,4 +1,3 @@
-
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
@@ -12,8 +11,6 @@ struct SinhVien {
   char GioiTinh;
   float DiemToan, DiemLy, DiemHoa, DTB;
 };
-
-
 
 void Nhap(SinhVien &sv) {
   cin >> sv.MASV;
