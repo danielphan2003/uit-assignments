@@ -14,41 +14,40 @@ struct SinhVien {
 
 int len(const char *s) {
   int dem = 0;
-  while (s[dem] != '\0')
-      dem++;
+  while (s[dem++] != '\0');
   return dem;
 }
 
-void ChuanHoaXauDon(char *s, int &i, int &j) {
-  s[j] = s[i];
-  if (toupper(s[i]) != s[i]) {
-      s[j] = toupper(s[i]);
-  }
+bool eosubstr(char c) {
+  return c == ' ' || c == '\0';
+}
 
-  ++i;
-  ++j;
+void ChuanHoaXauDon(char *s, int &oldHead, int &newHead) {
+  // skip beginning whitespace
+  while (s[oldHead++] == ' ');
 
-  while (s[i] != ' ' && s[i] != '\0') {
-      s[j] = s[i];
-      if (tolower(s[i]) != s[i])
-          s[j] = tolower(s[i]);
-      ++i;
-      ++j;
-  }
+  // substring.begin()
+  s[newHead++] = toupper(s[oldHead - 1]);
 
-  while (s[i] == ' ') ++i;
-  s[j] = ' ';
-  ++j;
+  // substring.begin() + 1 .. substring.end() - 1
+  while (!eosubstr(s[oldHead]))
+    s[newHead++] = tolower(s[oldHead++]);
+
+  // strings.end()
+  while (eosubstr(s[oldHead]))
+    if (s[++oldHead] == '\0') {
+      s[newHead] = '\0';
+      return;
+    }
+
+  // substring.end()
+  s[newHead++] = ' ';
 }
 
 void ChuanHoaXau(char *s) {
   int len_s = len(s);
-  int i = 0, j = 0;
-
-  while (s[i] == ' ') ++i;
-  while (i < len_s) ChuanHoaXauDon(s, i, j);
-  --j;
-  s[j] = '\0';
+  for (int oldHead = 0, newHead = 0; oldHead < len_s;)
+    ChuanHoaXauDon(s, oldHead, newHead);
 }
 
 void Nhap(SinhVien &sv) {
