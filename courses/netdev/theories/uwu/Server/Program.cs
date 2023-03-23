@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-
+using System.Runtime.InteropServices;
 using uwu.Library;
 using uwu.Server;
 
@@ -15,12 +15,15 @@ IHost host = Host.CreateDefaultBuilder(args)
                     ExclusiveAddressUse = false,
                 };
 
-                // ignore lost connection
-                uint IOC_IN = 0x80000000;
-                uint IOC_VENDOR = 0x18000000;
-                uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-                udpClient.Client.IOControl((int) SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false)
-                }, null);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // ignore lost connection only on Windows
+                    uint IOC_IN = 0x80000000;
+                    uint IOC_VENDOR = 0x18000000;
+                    uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                    udpClient.Client.IOControl((int) SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false)
+                    }, null);
+                }
 
                 udpClient.Client.ReceiveTimeout = 200;
                 udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
