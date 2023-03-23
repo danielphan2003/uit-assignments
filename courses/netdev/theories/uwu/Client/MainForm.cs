@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using uwu.Library;
 
@@ -11,6 +12,10 @@ namespace uwu.Client;
 public partial class MainForm : Form
 {
     private Socket socket;
+    private static readonly Regex IPAddressPortSchema = _generateIPAddressPortSchema();
+
+    [GeneratedRegex("(.*)((?::))((?:[0-9]+))")]
+    private static partial Regex _generateIPAddressPortSchema();
 
     public MainForm()
     {
@@ -22,46 +27,6 @@ public partial class MainForm : Form
         InitializeComponent();
     }
 
-    private static IPAddress? NormalizeIP(string s)
-    {
-        var match = s.Split(':', StringSplitOptions.RemoveEmptyEntries);
-        var rawIpAddress = match[0];
-
-        var validIpAddress = IPAddress.TryParse(rawIpAddress, out IPAddress? ipAddress);
-
-        if (validIpAddress && ipAddress != null)
-        {
-            return ipAddress;
-        }
-
-        try
-        {
-            ipAddress = Dns.GetHostAddresses(rawIpAddress)[0];
-            return ipAddress;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private static int? NormalizePort(string s)
-    {
-        var match = s.Split(':', StringSplitOptions.RemoveEmptyEntries);
-        if (match.Length < 2)
-        {
-            return null;
-        }
-
-        var validPort = int.TryParse(match[1], out int port);
-        if (validPort)
-        {
-            return port;
-        }
-
-        return null;
-    }
-
     private IPEndPoint? GetRemoteEndpoint()
     {
         if (externalServerInput.Enabled)
@@ -71,14 +36,51 @@ public partial class MainForm : Form
                 MessageBox.Show("External server host name or IP address cannot be empty!", "Invalid external server");
                 return null;
             }
-            var ipAddress = NormalizeIP(externalServerInput.Text);
-            if (ipAddress == null)
+
+            var domainPortMatches = externalServerInput.Text.Split(':');
+
+            if (domainPortMatches.Length > 0 && domainPortMatches.Length < 3)
             {
-                MessageBox.Show("Invalid host name or IP address for external server.", "Invalid external server");
-                return null;
+                var ipAddresses = Dns.GetHostAddresses(domainPortMatches[0]);
+                var ipAddress = ipAddresses[0];
+                if (domainPortMatches.Length == 1 && ipAddresses.Length != 0)
+                {
+                    return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
+                }
+                
+                if (domainPortMatches.Length == 2)
+                {
+                    var validPort = short.TryParse(domainPortMatches[1], out short port);
+                    if (validPort)
+                    {
+                        return new IPEndPoint(ipAddress, port);
+                    }
+                }
             }
-            var port = NormalizePort(externalServerInput.Text) ?? NetworkConfiguration.DEFAULT_PORT;
-            return new IPEndPoint(ipAddress, port);
+            
+            var ipAddressPortMatches = IPAddressPortSchema.Match(externalServerInput.Text);
+
+            if (ipAddressPortMatches.Length == 0)
+            {
+                var validIpAddress = IPAddress.TryParse(externalServerInput.Text, out IPAddress? ipAddress);
+                if (validIpAddress && ipAddress != null)
+                {
+                    return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
+                }
+            }
+
+            if (ipAddressPortMatches.Length == 2)
+            {
+                var validIpAddress = IPAddress.TryParse($"{ipAddressPortMatches.Groups[0]}", out IPAddress? ipAddress);
+                var validPort = short.TryParse($"{ipAddressPortMatches.Groups[1]}", out short port);
+                if (validIpAddress && validPort && ipAddress != null)
+                {
+                    return new IPEndPoint(ipAddress, port);
+                }
+            }
+
+            MessageBox.Show("Invalid host name or IP address for external server.", "Invalid external server");
+            return null;
         }
         return new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConfiguration.DEFAULT_PORT);
     }
@@ -128,7 +130,7 @@ public partial class MainForm : Form
             }
             catch
             {
-                MessageBox.Show("Cannot send to nor receive from external server. Please recheck external server input.", "Failed connection");        
+                MessageBox.Show("Cannot send to nor receive from external server. Server might be down.", "Failed connection");        
             }
             finally
             {
