@@ -35,3 +35,6 @@
 *.direnv
 *.local
 tmp.cpp
+**/obj
+**/bin
+*.zip

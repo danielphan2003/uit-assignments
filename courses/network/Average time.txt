@@ -1,0 +1,7 @@
+Average time for tf_efficientnet_b4 validation 1 image (10 epoch):  6.880913081800009
+Average time for coat_tiny validation 1 image (10 epoch):  6.057471387700161
+Average time for vit_base_patch16_224 validation 1 image (10 epoch):  21.307456313499955
+Average time for inception_v4 validation 1 image (10 epoch):  9.511386365999988
+Average time for resnet50 validation 1 image (10 epoch):  10.899975073099995
+Average time for gmlp_s16_224 validation 1 image (10 epoch):  8.885544370899968
+Average time for mixer_b16_224_in21k validation 1 image (10 epoch):  14.351690240199876

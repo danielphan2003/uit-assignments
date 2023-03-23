@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dapper" Version="2.0.123" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.0" />
+    <PackageReference Include="Modern.Forms" Version="0.3.0" />
+  </ItemGroup>
+
+</Project>
