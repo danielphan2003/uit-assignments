@@ -6,15 +6,15 @@ A glorified chat bot that helps :wink:.
 
 ### uwu.Client
 
-uwu.Client uses `System.Net.Sockets.Socket` and async for sending messages and receiving replies from server.
+uwu.Client uses `System.Net.Sockets.Socket` for sending messages and receiving replies from server. It handles connections to the server asynchronously.
 
-It prefers IPv4 address over IPv6, but fallbacks to IPv6 for IPv6-only servers.
+It prefers IPv4 addresses over IPv6 ones.
 
 ### uwu.Server
 
-Server uses `System.Net.Sockets.UdpClient` and [Worker Service][dotnet-worker-service] (async) for receiving messages and sending replies to client.
+uwu.Server uses `System.Net.Sockets.UdpClient` and [Worker Service][dotnet-worker-service] for receiving messages and sending replies to client. It can handle connections for multiple clients all at once.
 
-It currently handles commands from `uwu.Library.MessageUtils.Commands`, and listens on 0.0.0.0:5667.
+It listens for messages from clients on 0.0.0.0:5667, and handles commands from `uwu.Library.MessageUtils.Commands`.
 
 ### uwu.Library
 
@@ -24,7 +24,9 @@ This allows us to optionally develop new features more quickly, like locally han
 
 ## Develop
 
-There are two targets: `Client`, `Server`.
+There are two targets to develop for: `Client` and `Server`.
+
+`Library` does not have anything to build against, but you're more than welcome to write unit tests for this.
 
 Before running anything, you should have [.NET SDK 7.0][dotnet-sdk-7] installed.
 
