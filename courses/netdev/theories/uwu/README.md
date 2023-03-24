@@ -28,11 +28,13 @@ Feel free to make a pull request :heart:.
 
 ## Public servers
 
-A public server is available at fragrant-frog-1282.fly.dev, deployed on https://fly.io/
+A public server is available at fragrant-frog-1282.fly.dev, deployed on [fly.io][fly-io]
 
-### Running your own server on fly.io
+### Running your own server on [fly.io][fly-io]
 
-Create a new app with https://fly.io/docs/hands-on/install-flyctl/ and replaces `[[services]]` with:
+Create a new app by [installing `flyctl`][install-flyctl] and running `fly launch`.
+
+In `fly.toml`, replace all of the `[[services]]` block with:
 ```toml
 [[services]]
   http_checks = []
@@ -46,9 +48,9 @@ Create a new app with https://fly.io/docs/hands-on/install-flyctl/ and replaces 
 
 Deploy it with `fly deploy` and use the provided domain name for the external server setting in uwu.Client.
 
-Note that for UDP to work on fly.io, the server added support for resolving `fly-global-services` and binding its socket listener to that address. See [the `fly-global-services` Address][fly-global-services-address].
+Note that for UDP to work, the server added support for resolving `fly-global-services` and binding its socket listener to that address. See [the `fly-global-services` Address][fly-global-services-address]. Also [UDP won't work over IPv6][fly-udp-wont-work-over-ipv6] (yet).
 
-A limitation for running on fly.io is that [UDP won't work over IPv6][fly-udp-wont-work-over-ipv6] yet. 
-
+[fly-io]: https://fly.io/
+[install-flyctl]: https://fly.io/docs/hands-on/install-flyctl/
 [fly-global-services-address]: https://fly.io/docs/app-guides/udp-and-tcp/#the-fly-global-services-address
 [fly-udp-wont-work-over-ipv6]: https://fly.io/docs/app-guides/udp-and-tcp/#udp-won-t-work-over-ipv6
