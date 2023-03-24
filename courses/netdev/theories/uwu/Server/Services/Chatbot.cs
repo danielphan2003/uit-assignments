@@ -12,12 +12,12 @@ internal static class NetworkServiceLogEvents
     internal static EventId Send = new(1002, nameof(Send));
 }
 
-public class NetworkService : BackgroundService
+public class ChatbotService : BackgroundService
 {
-    private readonly ILogger<NetworkService> _logger;
+    private readonly ILogger<ChatbotService> _logger;
     private readonly UdpClient _socket;
 
-    public NetworkService(ILogger<NetworkService> logger, UdpClient socket)
+    public ChatbotService(ILogger<ChatbotService> logger, UdpClient socket)
     {
         _logger = logger;
         _socket = socket;
@@ -25,14 +25,14 @@ public class NetworkService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation(NetworkServiceLogEvents.Listen, "{Service} is listening", nameof(NetworkService));
+        _logger.LogInformation(NetworkServiceLogEvents.Listen, "{Service} is listening", nameof(ChatbotService));
         while (!stoppingToken.IsCancellationRequested)
         {
             var receivedResult = await _socket.ReceiveAsync(stoppingToken);
             var receivedBytes = receivedResult.Buffer;
             var destination = receivedResult.RemoteEndPoint;
             var rawMessage = Encoding.UTF8.GetString(receivedBytes);
-            var reply = MessageUtils.Reply(rawMessage);
+            var reply = Reply(rawMessage);
 
             _logger.LogInformation(NetworkServiceLogEvents.Receive, "Received a message from {Destination}", destination);
             
@@ -45,7 +45,42 @@ public class NetworkService : BackgroundService
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await Task.Run(() => {
-            _logger.LogInformation(NetworkServiceLogEvents.Stop, "{Service} is stopping...", nameof(NetworkService));
+            _logger.LogInformation(NetworkServiceLogEvents.Stop, "{Service} is stopping...", nameof(ChatbotService));
         }, cancellationToken);
+    }
+
+    public static string TryExecuteCommand(Message message)
+    {
+        try
+        {
+            var command = MessageUtils.Commands.Where(c => c.Command == message.Command).FirstOrDefault(new MessageCommand());
+            if (string.IsNullOrEmpty(command.Command) && !string.IsNullOrEmpty(message.Command))
+            {
+                return "Oops. We don't have that command.";
+            }
+            return command.Execute(message);
+        }
+        catch (Exception e)
+        {
+            return $"Error while processing message content. Full stack trace: {e}";
+        }
+    }
+
+    public static Message Reply(string s)
+    {
+        var isValidMessage = Message.TryParse(s, out Message message);
+
+        var reply = new Message();
+
+        if (isValidMessage)
+        {
+            reply.Content = TryExecuteCommand(message);
+        }
+        else
+        {
+            reply.Content = "Invalid message format!";
+        }
+
+        return reply;
     }
 }

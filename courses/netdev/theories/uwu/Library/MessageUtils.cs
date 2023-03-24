@@ -165,39 +165,4 @@ Source code is available at https://github.com/danielphan2003/uit-assignments/co
             CallbackFn = (_) => About(),
         },
     };
-
-    public static string TryExecuteCommand(Message message)
-    {
-        try
-        {
-            var command = Commands.Where(c => c.Command == message.Command).FirstOrDefault(new MessageCommand());
-            if (string.IsNullOrEmpty(command.Command) && !string.IsNullOrEmpty(message.Command))
-            {
-                return "Oops. We don't have that command.";
-            }
-            return command.Execute(message);
-        }
-        catch (Exception e)
-        {
-            return $"Error while processing message content. Full stack trace: {e}";
-        }
-    }
-
-    public static Message Reply(string s)
-    {
-        var isValidMessage = Message.TryParse(s, out Message message);
-
-        var reply = new Message();
-
-        if (isValidMessage)
-        {
-            reply.Content = TryExecuteCommand(message);
-        }
-        else
-        {
-            reply.Content = "Invalid message format!";
-        }
-
-        return reply;
-    }
 }

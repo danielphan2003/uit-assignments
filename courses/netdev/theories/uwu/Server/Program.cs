@@ -38,7 +38,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
                 return udpClient;
             })
-            .AddHostedService<NetworkService>();
+            .AddHostedService<ChatbotService>();
     })
     .Build();
 
