@@ -12,10 +12,7 @@ namespace uwu.Client;
 public partial class MainForm : Form
 {
     private Socket socket;
-    private static readonly Regex IPAddressPortSchema = _generateIPAddressPortSchema();
-
-    [GeneratedRegex("(.*)((?::))((?:[0-9]+))")]
-    private static partial Regex _generateIPAddressPortSchema();
+    private static readonly IPAddress localhost = IPAddress.Parse("127.0.0.1");
 
     public MainForm()
     {
@@ -35,77 +32,71 @@ public partial class MainForm : Form
 
     private IPEndPoint? GetRemoteEndpoint()
     {
+        var port = NetworkConfiguration.DEFAULT_PORT;
+
         if (externalServerInput.Enabled)
         {
+            string? error = null;
+
             if (string.IsNullOrWhiteSpace(externalServerInput.Text))
             {
-                MessageBox.Show("External server host name or IP address cannot be empty!", "Invalid external server");
-                return null;
+                error = "Domain name or IP address cannot be empty!";
+            }
+
+            // handle IP addresses, optionally with port number
+            var validEndPoint = IPEndPoint.TryParse(externalServerInput.Text, out IPEndPoint? ipEndPoint);
+
+            if (validEndPoint && ipEndPoint != null)
+            {
+                if (ipEndPoint.Port == 0)
+                {
+                    ipEndPoint.Port = port;
+                }
+                return ipEndPoint;
             }
 
             var domainPortMatches = externalServerInput.Text.Split(':');
+            var domainIpAddresses = Array.Empty<IPAddress?>();
+            var validDomain = false;
 
-            if (domainPortMatches.Length > 0 && domainPortMatches.Length < 3)
+            try
             {
-                var ipAddresses = Dns.GetHostAddresses(domainPortMatches[0]);
-
-                if (ipAddresses.Length != 0)
-                {
-                    // prioritize IPv4, since Fly.io does not support UDP over IPv6 for now.
-                    var ipv4Address = ipAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).First();
-
-                    var ipv6Address = ipAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetworkV6).First();
-
-                    var ipAddress = ipv4Address ?? ipv6Address;
-
-                    switch (domainPortMatches.Length)
-                    {
-                        case 1:
-                            return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
-
-                        case 2:
-                            var validPort = short.TryParse(domainPortMatches[1], out short port);
-                            if (validPort)
-                            {
-                                return new IPEndPoint(ipAddress, port);
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
+                domainIpAddresses = Dns.GetHostAddresses(domainPortMatches[0]);
+                validDomain = domainIpAddresses.Any();
             }
-            
-            var ipAddressPortMatches = IPAddressPortSchema.Match(externalServerInput.Text);
-
-            switch (ipAddressPortMatches.Length)
+            catch (Exception)
             {
-                case 0:
-                    var validIpAddress = IPAddress.TryParse(externalServerInput.Text, out IPAddress? ipAddress);
-                    if (validIpAddress && ipAddress != null)
-                    {
-                        return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
-                    }
-                    break;
-
-                case 2:
-                    validIpAddress = IPAddress.TryParse($"{ipAddressPortMatches.Groups[0]}", out ipAddress);
-                    var validPort = short.TryParse($"{ipAddressPortMatches.Groups[1]}", out short port);
-                    if (validIpAddress && validPort && ipAddress != null)
-                    {
-                        return new IPEndPoint(ipAddress, port);
-                    }
-                    break;
-
-                default:
-                    break;
+                error = "Invalid IP address or domain name not found.";
             }
 
-            MessageBox.Show("Invalid host name or IP address for external server.", "Invalid external server");
+            var validNoPort = domainPortMatches.Length == 1;
+            var validMaybePort = int.TryParse(domainPortMatches[^1], out var maybePort);
+            var validPort = validMaybePort && maybePort >= IPEndPoint.MinPort && maybePort <= IPEndPoint.MaxPort;
+
+            if (validDomain && (validNoPort || validPort))
+            {
+                port = validNoPort ? port : maybePort;
+
+                var ipv4Address = domainIpAddresses
+                    .FirstOrDefault(ip => ip?.AddressFamily == AddressFamily.InterNetwork, null);
+                var ipv6Address = domainIpAddresses
+                    .FirstOrDefault(ip => ip?.AddressFamily == AddressFamily.InterNetworkV6, null);
+                
+                var ipAddress = ipv4Address ?? ipv6Address ?? localhost;
+
+                return new IPEndPoint(ipAddress, port);
+            }
+
+            if (!validNoPort && !validPort)
+            {
+                error = "Invalid port number";
+            }
+
+            MessageBox.Show(error ?? "Unknown error", "Invalid external server");
             return null;
         }
-        return new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConfiguration.DEFAULT_PORT);
+
+        return new IPEndPoint(localhost, NetworkConfiguration.DEFAULT_PORT);
     }
 
     private void AppendChatView(string whom, Library.Message msg)
