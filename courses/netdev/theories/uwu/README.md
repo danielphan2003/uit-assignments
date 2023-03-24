@@ -4,23 +4,23 @@ A glorified chat bot that helps :wink:.
 
 ## Overview
 
-### Client
+### uwu.Client
 
-Client uses System.Net.Sockets.Socket and async for sending message and receiving reply from server.
+uwu.Client uses `System.Net.Sockets.Socket` and async for sending messages and receiving replies from server.
 
 It prefers IPv4 address over IPv6, but fallbacks to IPv6 for IPv6-only servers.
 
-### Server
+### uwu.Server
 
-Server uses System.Net.Sockets.UdpClient and Worker Service (async) for receiving message and sending reply to client.
+Server uses `System.Net.Sockets.UdpClient` and [Worker Service][dotnet-worker-service] (async) for receiving messages and sending replies to client.
 
-### Library
+It currently handles commands from `uwu.Library.MessageUtils.Commands`.
 
-Both uwu.Client and uwu.Server use uwu.Library for parsing and creating Message, as well as some other utilities.
+### uwu.Library
 
-All available commands are in `MessageUtils.Commands`. You can add new MessageCommand to it, and the server will be able to handle that new command.
+Both `uwu.Client` and `uwu.Server` use `uwu.Library` for parsing and creating a `Message` object, as well as some other utilities.
 
-This allows us to develop new features more quickly, like locally handling commands whenever the server is offline, or providing auto completion for command when typing a new message in Client.
+This allows us to optionally develop new features more quickly, like locally handling commands whenever the server is offline, or providing auto completion for command when typing a new message in uwu.Client.
 
 ## Contribute
 
@@ -50,6 +50,7 @@ Deploy it with `fly deploy` and use the provided domain name for the external se
 
 Note that for UDP to work, the server added support for resolving `fly-global-services` and binding its socket listener to that address. See [the `fly-global-services` Address][fly-global-services-address]. Also [UDP won't work over IPv6][fly-udp-wont-work-over-ipv6] (yet).
 
+[dotnet-worker-service]: https://learn.microsoft.com/en-us/dotnet/core/extensions/workers
 [fly-io]: https://fly.io/
 [install-flyctl]: https://fly.io/docs/hands-on/install-flyctl/
 [fly-global-services-address]: https://fly.io/docs/app-guides/udp-and-tcp/#the-fly-global-services-address
