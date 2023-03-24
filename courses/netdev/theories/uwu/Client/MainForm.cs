@@ -11,7 +11,7 @@ namespace uwu.Client;
 
 public partial class MainForm : Form
 {
-    private Socket socket;
+    private readonly Socket socket;
     private static readonly IPAddress localhost = IPAddress.Parse("127.0.0.1");
 
     public MainForm()
@@ -138,16 +138,15 @@ public partial class MainForm : Form
 
                 chatView.AppendText($"{Environment.NewLine}-------------------");
 
+                chatInput.Clear();
+
                 return;
             }
             catch
             {
                 MessageBox.Show("Cannot send to nor receive from external server. Server might be down.", "Failed connection");        
             }
-            finally
-            {
-                chatInput.Clear();
-            }
+
         }
     }
 }
