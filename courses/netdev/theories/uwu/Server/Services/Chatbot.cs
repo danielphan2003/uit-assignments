@@ -46,6 +46,7 @@ public class ChatbotService : BackgroundService
     {
         await Task.Run(() => {
             _logger.LogInformation(NetworkServiceLogEvents.Stop, "{Service} is stopping...", nameof(ChatbotService));
+            _socket.Close();
         }, cancellationToken);
     }
 

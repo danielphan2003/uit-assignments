@@ -27,6 +27,12 @@ public partial class MainForm : Form
         InitializeComponent();
     }
 
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        socket.Close();
+    }
+
     private IPEndPoint? GetRemoteEndpoint()
     {
         if (externalServerInput.Enabled)
@@ -56,6 +62,7 @@ public partial class MainForm : Form
                     {
                         case 1:
                             return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
+
                         case 2:
                             var validPort = short.TryParse(domainPortMatches[1], out short port);
                             if (validPort)
@@ -63,6 +70,7 @@ public partial class MainForm : Form
                                 return new IPEndPoint(ipAddress, port);
                             }
                             break;
+
                         default:
                             break;
                     }
@@ -71,23 +79,27 @@ public partial class MainForm : Form
             
             var ipAddressPortMatches = IPAddressPortSchema.Match(externalServerInput.Text);
 
-            if (ipAddressPortMatches.Length == 0)
+            switch (ipAddressPortMatches.Length)
             {
-                var validIpAddress = IPAddress.TryParse(externalServerInput.Text, out IPAddress? ipAddress);
-                if (validIpAddress && ipAddress != null)
-                {
-                    return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
-                }
-            }
+                case 0:
+                    var validIpAddress = IPAddress.TryParse(externalServerInput.Text, out IPAddress? ipAddress);
+                    if (validIpAddress && ipAddress != null)
+                    {
+                        return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
+                    }
+                    break;
 
-            if (ipAddressPortMatches.Length == 2)
-            {
-                var validIpAddress = IPAddress.TryParse($"{ipAddressPortMatches.Groups[0]}", out IPAddress? ipAddress);
-                var validPort = short.TryParse($"{ipAddressPortMatches.Groups[1]}", out short port);
-                if (validIpAddress && validPort && ipAddress != null)
-                {
-                    return new IPEndPoint(ipAddress, port);
-                }
+                case 2:
+                    validIpAddress = IPAddress.TryParse($"{ipAddressPortMatches.Groups[0]}", out ipAddress);
+                    var validPort = short.TryParse($"{ipAddressPortMatches.Groups[1]}", out short port);
+                    if (validIpAddress && validPort && ipAddress != null)
+                    {
+                        return new IPEndPoint(ipAddress, port);
+                    }
+                    break;
+
+                default:
+                    break;
             }
 
             MessageBox.Show("Invalid host name or IP address for external server.", "Invalid external server");
@@ -103,7 +115,7 @@ public partial class MainForm : Form
         chatView.AppendText($"{(chatView.Text == "" ? "" : Environment.NewLine)}{whom}{msgText}");
     }
 
-    private async void OnSendMessage(object sender, EventArgs e)
+    private async void OnSendMessageClick(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(chatInput.Text))
         {
