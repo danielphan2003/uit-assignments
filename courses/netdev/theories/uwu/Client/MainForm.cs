@@ -1,5 +1,5 @@
 using System;
-using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -42,18 +42,29 @@ public partial class MainForm : Form
             if (domainPortMatches.Length > 0 && domainPortMatches.Length < 3)
             {
                 var ipAddresses = Dns.GetHostAddresses(domainPortMatches[0]);
-                var ipAddress = ipAddresses[0];
-                if (domainPortMatches.Length == 1 && ipAddresses.Length != 0)
+
+                if (ipAddresses.Length != 0)
                 {
-                    return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
-                }
-                
-                if (domainPortMatches.Length == 2)
-                {
-                    var validPort = short.TryParse(domainPortMatches[1], out short port);
-                    if (validPort)
+                    // prioritize IPv4, since Fly.io does not support UDP over IPv6 for now.
+                    var ipv4Address = ipAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).First();
+
+                    var ipv6Address = ipAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetworkV6).First();
+
+                    var ipAddress = ipv4Address ?? ipv6Address;
+
+                    switch (domainPortMatches.Length)
                     {
-                        return new IPEndPoint(ipAddress, port);
+                        case 1:
+                            return new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT);
+                        case 2:
+                            var validPort = short.TryParse(domainPortMatches[1], out short port);
+                            if (validPort)
+                            {
+                                return new IPEndPoint(ipAddress, port);
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -87,11 +98,9 @@ public partial class MainForm : Form
 
     private void AppendChatView(string whom, Library.Message msg)
     {
-        var msgText = msg.Format((t) => $"{t.AddHours(7):yyyy/MM/dd HH:mm:ss}");
+        // Linux servers uses '\n' instead of '\r\n' (Environment.NewLine)
+        var msgText = msg.Format((t) => $"{t.AddHours(7):yyyy/MM/dd HH:mm:ss}").ReplaceLineEndings();
         chatView.AppendText($"{(chatView.Text == "" ? "" : Environment.NewLine)}{whom}{msgText}");
-        chatView.SelectionStart = chatView.TextLength;
-        chatView.ScrollToCaret();
-        chatView.Refresh();
     }
 
     private async void OnSendMessage(object sender, EventArgs e)

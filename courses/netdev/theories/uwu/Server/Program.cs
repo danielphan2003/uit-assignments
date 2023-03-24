@@ -27,7 +27,14 @@ IHost host = Host.CreateDefaultBuilder(args)
 
                 udpClient.Client.ReceiveTimeout = 200;
                 udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, NetworkConfiguration.DEFAULT_PORT));
+
+                var runningOnFlyio = new List<string>() {"FLY_APP_NAME", "FLY_ALLOC_ID", "FLY_REGION"}
+                    .Select((f) => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(f)))
+                    .Contains(true);
+
+                var ipAddress = runningOnFlyio ? Dns.GetHostAddresses("fly-global-services")[0] : IPAddress.Any;
+
+                udpClient.Client.Bind(new IPEndPoint(ipAddress, NetworkConfiguration.DEFAULT_PORT));
 
                 return udpClient;
             })

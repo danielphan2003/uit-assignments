@@ -76,6 +76,7 @@ partial class MainForm
         {
             Dock = DockStyle.Fill,
             // Anchor = AnchorStyles.Left | AnchorStyles.Right,
+            Text = "fragrant-frog-1282.fly.dev",
             Enabled = false,
         };
 
