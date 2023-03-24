@@ -75,7 +75,6 @@ partial class MainForm
         externalServerInput = new()
         {
             Dock = DockStyle.Fill,
-            // Anchor = AnchorStyles.Left | AnchorStyles.Right,
             Text = "fragrant-frog-1282.fly.dev",
             Enabled = false,
         };
@@ -136,11 +135,10 @@ partial class MainForm
         var sendMessage = new Button()
         {
             Text = "Send",
-            // AutoSize = true,
             Dock = DockStyle.Fill,
         };
 
-        sendMessage.Click += new EventHandler(OnSendMessage);
+        sendMessage.Click += new EventHandler(OnSendMessageClick);
 
         chatInputPanel.Controls.Add(sendMessage);
 
